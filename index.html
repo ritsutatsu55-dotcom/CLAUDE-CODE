@@ -1,0 +1,1097 @@
+<title>月次ビジョン & タスク管理</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root {
+    color-scheme: light;
+    --surface-page:   #eef0f4;
+    --surface-card:   #fbfbf9;
+    --surface-card-2: #f4f4f1;
+    --text-primary:   #1b1c22;
+    --text-secondary: #55575f;
+    --text-muted:     #8b8d94;
+    --border:         rgba(27,28,34,0.10);
+    --border-strong:  rgba(27,28,34,0.18);
+
+    --ink:            #2c3568;
+    --ink-strong:     #1c2447;
+    --ink-tint:       #dde2f5;
+    --vermilion:      #c8482f;
+    --vermilion-tint: #f4ded8;
+    --vision-grad-1:  #2c3568;
+    --vision-grad-2:  #1c2447;
+
+    --series-progress:       #2a78d6;
+    --series-progress-track: #cde2fb;
+    --series-time:           #1baf7a;
+    --series-time-track:     #d7f0e6;
+
+    --status-high: #d03b3b;
+    --status-mid:  #b9780a;
+    --status-low:  #0ca30c;
+    --status-high-bg: #f9dcdc;
+    --status-mid-bg:  #f8e6c2;
+    --status-low-bg:  #d9f0d9;
+
+    --shadow-card: 0 1px 2px rgba(20,20,30,0.04), 0 8px 24px -16px rgba(20,20,30,0.18);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --surface-page:   #0c0d11;
+      --surface-card:   #17181e;
+      --surface-card-2: #1d1f26;
+      --text-primary:   #f2f2ef;
+      --text-secondary: #b9bac2;
+      --text-muted:     #83848c;
+      --border:         rgba(255,255,255,0.09);
+      --border-strong:  rgba(255,255,255,0.16);
+
+      --ink:            #7c8ce0;
+      --ink-strong:     #a4b0ea;
+      --ink-tint:       #262c4d;
+      --vermilion:      #e0714f;
+      --vermilion-tint: #3a231e;
+      --vision-grad-1:  #333c78;
+      --vision-grad-2:  #1a2040;
+
+      --series-progress:       #3987e5;
+      --series-progress-track: #1c3a63;
+      --series-time:           #199e70;
+      --series-time-track:     #113a2c;
+
+      --status-high: #e66767;
+      --status-mid:  #e0a53a;
+      --status-low:  #4dbb4d;
+      --status-high-bg: #3a2020;
+      --status-mid-bg:  #3a3018;
+      --status-low-bg:  #1e3320;
+
+      --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 12px 28px -18px rgba(0,0,0,0.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-page:   #0c0d11;
+    --surface-card:   #17181e;
+    --surface-card-2: #1d1f26;
+    --text-primary:   #f2f2ef;
+    --text-secondary: #b9bac2;
+    --text-muted:     #83848c;
+    --border:         rgba(255,255,255,0.09);
+    --border-strong:  rgba(255,255,255,0.16);
+    --ink:            #7c8ce0;
+    --ink-strong:     #a4b0ea;
+    --ink-tint:       #262c4d;
+    --vermilion:      #e0714f;
+    --vermilion-tint: #3a231e;
+    --vision-grad-1:  #333c78;
+    --vision-grad-2:  #1a2040;
+    --series-progress:       #3987e5;
+    --series-progress-track: #1c3a63;
+    --series-time:           #199e70;
+    --series-time-track:     #113a2c;
+    --status-high: #e66767;
+    --status-mid:  #e0a53a;
+    --status-low:  #4dbb4d;
+    --status-high-bg: #3a2020;
+    --status-mid-bg:  #3a3018;
+    --status-low-bg:  #1e3320;
+    --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 12px 28px -18px rgba(0,0,0,0.6);
+  }
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --surface-page:   #eef0f4;
+    --surface-card:   #fbfbf9;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--surface-page);
+    color: var(--text-primary);
+    font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .font-display {
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", serif;
+  }
+  a { color: inherit; }
+  button {
+    font-family: inherit;
+    cursor: pointer;
+  }
+  input, textarea {
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  .shell {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 28px 20px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  /* ---------- top bar ---------- */
+  .topbar {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 4px 2px;
+  }
+  .topbar .wordmark {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+  }
+  .topbar .month {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- vision hero ---------- */
+  .vision {
+    position: relative;
+    background: linear-gradient(160deg, var(--vision-grad-1) 0%, var(--vision-grad-2) 100%);
+    color: #f4f4fb;
+    border-radius: 4px;
+    padding: 36px 32px 30px;
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+  .vision::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
+    background-size: 3px 3px;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .vision-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    position: relative;
+  }
+  .vision-eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #c7cdee;
+    margin: 0 0 6px;
+  }
+  .vision-month {
+    font-size: 15px;
+    color: #e3e6f7;
+    font-variant-numeric: tabular-nums;
+    margin: 0;
+  }
+  .seal {
+    flex: none;
+    width: 46px;
+    height: 46px;
+    border-radius: 3px;
+    background: var(--vermilion);
+    color: #fff2ec;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+    font-size: 21px;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25), inset 0 0 0 1px rgba(255,255,255,0.15);
+    transform: rotate(-2deg);
+  }
+  .vision-text {
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", serif;
+    font-size: clamp(22px, 4.4vw, 30px);
+    line-height: 1.55;
+    margin: 22px 0 18px;
+    white-space: pre-wrap;
+    text-wrap: balance;
+    position: relative;
+  }
+  .vision-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    position: relative;
+    font-size: 12.5px;
+    color: #c7cdee;
+  }
+  .vision-edit-btn {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.22);
+    color: #f4f4fb;
+    padding: 7px 14px;
+    border-radius: 3px;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .vision-edit-btn:hover { background: rgba(255,255,255,0.2); }
+  .vision-editor textarea {
+    width: 100%;
+    min-height: 120px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 3px;
+    color: #fff;
+    padding: 12px 14px;
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+    font-size: 18px;
+    line-height: 1.6;
+    resize: vertical;
+    margin: 18px 0 12px;
+  }
+  .vision-editor textarea::placeholder { color: rgba(255,255,255,0.45); }
+  .vision-editor .row { display: flex; gap: 8px; justify-content: flex-end; position: relative; }
+  .btn-ghost-light {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #f4f4fb;
+    padding: 7px 14px;
+    border-radius: 3px;
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+  .btn-solid-light {
+    background: #f4f4fb;
+    border: 1px solid transparent;
+    color: var(--ink-strong);
+    padding: 7px 14px;
+    border-radius: 3px;
+    font-size: 12.5px;
+    font-weight: 700;
+  }
+  [hidden] { display: none !important; }
+
+  /* ---------- generic card ---------- */
+  .card {
+    background: var(--surface-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    box-shadow: var(--shadow-card);
+    padding: 22px 22px 20px;
+  }
+  .card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+  .card-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: 0.01em;
+  }
+  .card-sub {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    margin: 3px 0 0;
+  }
+
+  /* ---------- stats row ---------- */
+  .stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 620px) {
+    .stats-row { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) {
+    .vision-foot { flex-direction: column; align-items: stretch; gap: 10px; }
+    .vision-edit-btn { width: 100%; }
+  }
+
+  .rings {
+    display: flex;
+    gap: 22px;
+    margin-top: 14px;
+    justify-content: space-around;
+  }
+  .ring-item { text-align: center; }
+  .ring-item svg { display: block; margin: 0 auto; }
+  .ring-value {
+    font-size: 21px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .ring-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 6px;
+  }
+  .ring-detail {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 1px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .time-total {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-top: 14px;
+  }
+  .time-total .value {
+    font-size: 30px;
+    font-weight: 700;
+    font-variant-numeric: normal;
+    color: var(--text-primary);
+  }
+  .time-total .unit {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 88px;
+    margin-top: 14px;
+    border-bottom: 1px solid var(--border-strong);
+    padding-bottom: 0;
+  }
+  .bar-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+    gap: 6px;
+  }
+  .bar-col .bar {
+    width: 100%;
+    max-width: 22px;
+    background: var(--series-time);
+    border-radius: 4px 4px 0 0;
+    position: relative;
+    min-height: 3px;
+  }
+  .bar-col.is-today .bar { background: var(--series-time); box-shadow: 0 0 0 2px var(--surface-card), 0 0 0 3px var(--series-time); }
+  .bar-col .day-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+  .bar-col.is-today .day-label { color: var(--text-primary); font-weight: 700; }
+  .log-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    align-items: center;
+  }
+  .log-row label {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+  }
+  .log-row input[type="number"] {
+    width: 64px;
+    padding: 6px 8px;
+    border: 1px solid var(--border-strong);
+    border-radius: 3px;
+    background: var(--surface-card-2);
+  }
+  .btn-mini {
+    padding: 6px 12px;
+    border-radius: 3px;
+    border: 1px solid var(--border-strong);
+    background: var(--surface-card-2);
+    color: var(--text-primary);
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+  .btn-mini:hover { border-color: var(--ink); color: var(--ink); }
+
+  /* ---------- tasks ---------- */
+  .btn-primary {
+    background: var(--ink);
+    color: #fff;
+    border: 1px solid transparent;
+    padding: 8px 14px;
+    border-radius: 3px;
+    font-size: 12.5px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .btn-primary:hover { background: var(--ink-strong); }
+
+  .task-list {
+    list-style: none;
+    margin: 16px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .task-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 2px;
+    border-top: 1px solid var(--border);
+  }
+  .task-item:first-child { border-top: none; }
+  .task-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--ink);
+    flex: none;
+  }
+  .task-text {
+    flex: 1;
+    font-size: 14px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .task-item.done .task-text {
+    color: var(--text-muted);
+    text-decoration: line-through;
+  }
+  .chip {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 20px;
+  }
+  .chip::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+  .chip.high { background: var(--status-high-bg); color: var(--status-high); }
+  .chip.high::before { background: var(--status-high); }
+  .chip.mid  { background: var(--status-mid-bg); color: var(--status-mid); }
+  .chip.mid::before  { background: var(--status-mid); }
+  .chip.low  { background: var(--status-low-bg); color: var(--status-low); }
+  .chip.low::before  { background: var(--status-low); }
+  .chip.none { background: var(--surface-card-2); color: var(--text-muted); border: 1px dashed var(--border-strong); }
+  .chip.none::before { display: none; }
+  .task-del {
+    flex: none;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 16px;
+    line-height: 1;
+    padding: 4px 6px;
+  }
+  .task-del:hover { color: var(--status-high); }
+
+  .add-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .add-row input {
+    flex: 1;
+    min-width: 0;
+    padding: 9px 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: 3px;
+    background: var(--surface-card-2);
+    font-size: 14px;
+  }
+  .empty-hint {
+    font-size: 13px;
+    color: var(--text-muted);
+    padding: 14px 2px 2px;
+  }
+
+  /* ---------- notes board ---------- */
+  .notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+    margin-top: 16px;
+  }
+  .note-card {
+    background: var(--surface-card-2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 14px 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 108px;
+  }
+  .note-card:nth-child(odd)  { transform: rotate(-0.6deg); }
+  .note-card:nth-child(even) { transform: rotate(0.6deg); }
+  .note-text {
+    font-size: 13.5px;
+    flex: 1;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+  }
+  .note-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .note-date {
+    font-size: 10.5px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .note-actions { display: flex; gap: 6px; }
+  .btn-tiny {
+    background: none;
+    border: none;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--ink);
+    padding: 2px 4px;
+  }
+  .btn-tiny:hover { text-decoration: underline; }
+  .btn-tiny.danger { color: var(--text-muted); }
+  .btn-tiny.danger:hover { color: var(--status-high); }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    background: var(--ink-strong);
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 20px;
+    font-size: 13px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 50;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-6px);
+  }
+
+  footer.note {
+    text-align: center;
+    font-size: 11.5px;
+    color: var(--text-muted);
+    padding-top: 4px;
+  }
+</style>
+
+<div class="shell">
+
+  <div class="topbar">
+    <span class="wordmark font-display">月次ビジョン & タスク</span>
+    <span class="month" id="topbarMonth">—</span>
+  </div>
+
+  <!-- 1. ビジョンスペース -->
+  <section class="vision" aria-label="今月のビジョン">
+    <div class="vision-top">
+      <div>
+        <p class="vision-eyebrow">This Month's Vision</p>
+        <p class="vision-month" id="visionMonth">—</p>
+      </div>
+      <div class="seal" aria-hidden="true">誓</div>
+    </div>
+
+    <p class="vision-text font-display" id="visionText"></p>
+
+    <div class="vision-foot">
+      <span id="visionUpdated">—</span>
+      <button class="vision-edit-btn" id="visionEditBtn" type="button">月初めに立てる・見直す</button>
+    </div>
+
+    <div class="vision-editor" id="visionEditor" hidden>
+      <textarea id="visionInput" placeholder="今月、どうなっていたい？　何を大事にする？"></textarea>
+      <div class="row">
+        <button class="btn-ghost-light" id="visionCancel" type="button">キャンセル</button>
+        <button class="btn-solid-light" id="visionSave" type="button">この誓いを掲げる</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. 達成度 + 活動時間 -->
+  <div class="stats-row">
+    <section class="card" aria-label="目標達成度">
+      <div class="card-head">
+        <div>
+          <p class="card-title">達成度</p>
+          <p class="card-sub">タスクの完了状況から算出</p>
+        </div>
+      </div>
+      <div class="rings">
+        <div class="ring-item">
+          <svg width="88" height="88" viewBox="0 0 88 88">
+            <circle cx="44" cy="44" r="37" fill="none" stroke="var(--series-progress-track)" stroke-width="9"/>
+            <circle id="ringWeek" cx="44" cy="44" r="37" fill="none" stroke="var(--series-progress)" stroke-width="9"
+              stroke-linecap="round" stroke-dasharray="232.5" stroke-dashoffset="232.5"
+              transform="rotate(-90 44 44)"/>
+            <text x="44" y="49" text-anchor="middle" class="ring-value" id="ringWeekLabel" fill="var(--text-primary)" font-size="18" font-weight="700">0%</text>
+          </svg>
+          <div class="ring-label">今週</div>
+          <div class="ring-detail" id="weekDetail">0 / 0 件</div>
+        </div>
+        <div class="ring-item">
+          <svg width="88" height="88" viewBox="0 0 88 88">
+            <circle cx="44" cy="44" r="37" fill="none" stroke="var(--series-progress-track)" stroke-width="9"/>
+            <circle id="ringMonth" cx="44" cy="44" r="37" fill="none" stroke="var(--series-progress)" stroke-width="9"
+              stroke-linecap="round" stroke-dasharray="232.5" stroke-dashoffset="232.5"
+              transform="rotate(-90 44 44)"/>
+            <text x="44" y="49" text-anchor="middle" class="ring-value" id="ringMonthLabel" fill="var(--text-primary)" font-size="18" font-weight="700">0%</text>
+          </svg>
+          <div class="ring-label">今月</div>
+          <div class="ring-detail" id="monthDetail">0 / 0 件</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" aria-label="かけた時間">
+      <div class="card-head">
+        <div>
+          <p class="card-title">活動時間</p>
+          <p class="card-sub">今週、実際にかけた時間</p>
+        </div>
+      </div>
+      <div class="time-total">
+        <span class="value" id="timeTotal">0</span>
+        <span class="unit">時間 / 週</span>
+      </div>
+      <div class="bars" id="barsRow"></div>
+      <div class="log-row">
+        <label for="logHours">今日の作業時間</label>
+        <input type="number" id="logHours" min="0" max="16" step="0.5" value="1" />
+        <button class="btn-mini" id="logBtn" type="button">記録する</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- 3. タスクチェックリスト -->
+  <section class="card" aria-label="今月のタスク">
+    <div class="card-head">
+      <div>
+        <p class="card-title">今月のタスク</p>
+        <p class="card-sub">目標から落とし込んだ、やることリスト</p>
+      </div>
+      <button class="btn-primary" id="aiSortBtn" type="button">AIで優先度をつける</button>
+    </div>
+
+    <ul class="task-list" id="taskList"></ul>
+    <p class="empty-hint" id="taskEmptyHint" hidden>タスクはまだありません。下から追加してください。</p>
+
+    <div class="add-row">
+      <input type="text" id="taskInput" placeholder="タスクを追加（例：企画書のたたき台を書く）" />
+      <button class="btn-primary" id="taskAddBtn" type="button">追加</button>
+    </div>
+  </section>
+
+  <!-- 4. 検討中・メモ -->
+  <section class="card" aria-label="検討中・アイデアメモ">
+    <div class="card-head">
+      <div>
+        <p class="card-title">検討中・アイデアメモ</p>
+        <p class="card-sub">まだタスクにしていないこと・Claudeと相談中のこと</p>
+      </div>
+    </div>
+
+    <div class="notes-grid" id="notesGrid"></div>
+    <p class="empty-hint" id="notesEmptyHint" hidden>メモはまだありません。思いついたことを書き留めておきましょう。</p>
+
+    <div class="add-row">
+      <input type="text" id="noteInput" placeholder="気になっていること・検討中のことをメモ" />
+      <button class="btn-primary" id="noteAddBtn" type="button">メモする</button>
+    </div>
+  </section>
+
+  <footer class="note">毎月1日、ビジョンを見直すところから始めましょう。</footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var STORE_KEY = "goalDashboard.v1";
+  var RING_CIRC = 2 * Math.PI * 37;
+
+  var todayIdx = (new Date().getDay() + 6) % 7; // 0=Mon .. 6=Sun
+  var DAY_LABELS = ["月", "火", "水", "木", "金", "土", "日"];
+
+  function monthKey(d) {
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
+  }
+  function monthLabelJa(d) {
+    return d.getFullYear() + "年" + (d.getMonth() + 1) + "月";
+  }
+  function fmtDate(iso) {
+    if (!iso) return "";
+    var d = new Date(iso);
+    return d.getFullYear() + "/" + String(d.getMonth() + 1).padStart(2, "0") + "/" + String(d.getDate()).padStart(2, "0");
+  }
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+  function defaultState() {
+    var now = new Date();
+    return {
+      vision: {
+        month: monthKey(now),
+        text: "生活のリズムを整えながら、後回しにしていた仕事に区切りをつける。\n完璧を狙わず、まず手を動かす月にする。",
+        updatedAt: now.toISOString()
+      },
+      week: DAY_LABELS.map(function (label, i) {
+        return { label: label, hours: i < todayIdx ? [1.5, 2, 0, 3, 1][i % 5] || 0 : 0 };
+      }),
+      tasks: [
+        { id: uid(), text: "今月の目標を3つに絞って書き出す", priority: "high", done: true, thisWeek: true },
+        { id: uid(), text: "先延ばしにしていた企画書を仕上げる", priority: "high", done: false, thisWeek: true },
+        { id: uid(), text: "毎朝15分の運動を習慣化する", priority: "mid", done: false, thisWeek: true },
+        { id: uid(), text: "本棚の整理をする", priority: "low", done: false, thisWeek: false }
+      ],
+      notes: [
+        { id: uid(), text: "副業のアイデア、Claudeとブレスト中。来月方向性を決める。", addedAt: now.toISOString() },
+        { id: uid(), text: "週次レビューのやり方を見直したい。今のフォーマットは重すぎるかも。", addedAt: now.toISOString() }
+      ]
+    };
+  }
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORE_KEY);
+      if (!raw) return defaultState();
+      var parsed = JSON.parse(raw);
+      var now = new Date();
+      if (!parsed.vision || parsed.vision.month !== monthKey(now)) {
+        // 月が変わったら、達成度は今月分としてリセットしつつ vision は編集を促す
+      }
+      return parsed;
+    } catch (e) {
+      return defaultState();
+    }
+  }
+  function save() {
+    localStorage.setItem(STORE_KEY, JSON.stringify(state));
+  }
+
+  var state = load();
+
+  // ---------- toast ----------
+  var toastEl = document.getElementById("toast");
+  var toastTimer = null;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, 1800);
+  }
+
+  // ---------- vision ----------
+  var visionMonthEl = document.getElementById("visionMonth");
+  var topbarMonthEl = document.getElementById("topbarMonth");
+  var visionTextEl = document.getElementById("visionText");
+  var visionUpdatedEl = document.getElementById("visionUpdated");
+  var visionEditor = document.getElementById("visionEditor");
+  var visionInput = document.getElementById("visionInput");
+
+  function renderVision() {
+    var now = new Date();
+    var label = monthLabelJa(now);
+    visionMonthEl.textContent = label;
+    topbarMonthEl.textContent = label;
+    visionTextEl.textContent = state.vision.text || "（まだビジョンが立てられていません）";
+    visionUpdatedEl.textContent = state.vision.updatedAt ? fmtDate(state.vision.updatedAt) + " に更新" : "";
+  }
+
+  document.getElementById("visionEditBtn").addEventListener("click", function () {
+    visionInput.value = state.vision.text || "";
+    visionEditor.hidden = false;
+    visionInput.focus();
+  });
+  document.getElementById("visionCancel").addEventListener("click", function () {
+    visionEditor.hidden = true;
+  });
+  document.getElementById("visionSave").addEventListener("click", function () {
+    var v = visionInput.value.trim();
+    if (!v) { toast("ビジョンを入力してください"); return; }
+    state.vision.text = v;
+    state.vision.updatedAt = new Date().toISOString();
+    state.vision.month = monthKey(new Date());
+    save();
+    renderVision();
+    visionEditor.hidden = true;
+    toast("今月のビジョンを掲げました");
+  });
+
+  // ---------- rings (achievement) ----------
+  function setRing(circleEl, labelEl, ratio) {
+    var pct = Math.round(ratio * 100);
+    var offset = RING_CIRC * (1 - ratio);
+    circleEl.setAttribute("stroke-dashoffset", String(offset));
+    labelEl.textContent = pct + "%";
+  }
+
+  function renderAchievement() {
+    var weekTasks = state.tasks.filter(function (t) { return t.thisWeek; });
+    var monthTasks = state.tasks;
+    var weekDone = weekTasks.filter(function (t) { return t.done; }).length;
+    var monthDone = monthTasks.filter(function (t) { return t.done; }).length;
+
+    var weekRatio = weekTasks.length ? weekDone / weekTasks.length : 0;
+    var monthRatio = monthTasks.length ? monthDone / monthTasks.length : 0;
+
+    setRing(document.getElementById("ringWeek"), document.getElementById("ringWeekLabel"), weekRatio);
+    setRing(document.getElementById("ringMonth"), document.getElementById("ringMonthLabel"), monthRatio);
+
+    document.getElementById("weekDetail").textContent = weekDone + " / " + weekTasks.length + " 件";
+    document.getElementById("monthDetail").textContent = monthDone + " / " + monthTasks.length + " 件";
+  }
+
+  // ---------- time tracking ----------
+  var barsRow = document.getElementById("barsRow");
+  var timeTotalEl = document.getElementById("timeTotal");
+
+  function renderTime() {
+    var max = Math.max(4, Math.max.apply(null, state.week.map(function (d) { return d.hours; })));
+    barsRow.innerHTML = "";
+    var total = 0;
+    state.week.forEach(function (d, i) {
+      total += d.hours;
+      var col = document.createElement("div");
+      col.className = "bar-col" + (i === todayIdx ? " is-today" : "");
+      var bar = document.createElement("div");
+      bar.className = "bar";
+      var h = d.hours <= 0 ? 3 : Math.max(3, Math.round((d.hours / max) * 72));
+      bar.style.height = h + "px";
+      bar.title = d.label + "曜日: " + d.hours + "時間";
+      var label = document.createElement("div");
+      label.className = "day-label";
+      label.textContent = d.label;
+      col.appendChild(bar);
+      col.appendChild(label);
+      barsRow.appendChild(col);
+    });
+    timeTotalEl.textContent = (Math.round(total * 10) / 10).toString();
+  }
+
+  document.getElementById("logBtn").addEventListener("click", function () {
+    var input = document.getElementById("logHours");
+    var v = parseFloat(input.value);
+    if (isNaN(v) || v <= 0) { toast("時間を入力してください"); return; }
+    state.week[todayIdx].hours = Math.round((state.week[todayIdx].hours + v) * 10) / 10;
+    save();
+    renderTime();
+    toast("今日の作業時間を記録しました");
+  });
+
+  // ---------- tasks ----------
+  var taskListEl = document.getElementById("taskList");
+  var taskEmptyHint = document.getElementById("taskEmptyHint");
+  var PRIORITY_RANK = { high: 0, mid: 1, low: 2, null: 3 };
+  var PRIORITY_LABEL = { high: "優先度: 高", mid: "優先度: 中", low: "優先度: 低" };
+
+  function renderTasks() {
+    var sorted = state.tasks.slice().sort(function (a, b) {
+      if (a.done !== b.done) return a.done ? 1 : -1;
+      var ra = PRIORITY_RANK[a.priority] !== undefined ? PRIORITY_RANK[a.priority] : 3;
+      var rb = PRIORITY_RANK[b.priority] !== undefined ? PRIORITY_RANK[b.priority] : 3;
+      return ra - rb;
+    });
+
+    taskListEl.innerHTML = "";
+    taskEmptyHint.hidden = sorted.length > 0;
+
+    sorted.forEach(function (t) {
+      var li = document.createElement("li");
+      li.className = "task-item" + (t.done ? " done" : "");
+
+      var cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = t.done;
+      cb.setAttribute("aria-label", t.text);
+      cb.addEventListener("change", function () {
+        t.done = cb.checked;
+        save();
+        renderTasks();
+        renderAchievement();
+      });
+
+      var span = document.createElement("span");
+      span.className = "task-text";
+      span.textContent = t.text;
+
+      var chip = document.createElement("span");
+      if (t.priority && PRIORITY_LABEL[t.priority]) {
+        chip.className = "chip " + t.priority;
+        chip.textContent = PRIORITY_LABEL[t.priority];
+      } else {
+        chip.className = "chip none";
+        chip.textContent = "未分類";
+      }
+
+      var del = document.createElement("button");
+      del.className = "task-del";
+      del.type = "button";
+      del.setAttribute("aria-label", "削除");
+      del.textContent = "×";
+      del.addEventListener("click", function () {
+        state.tasks = state.tasks.filter(function (x) { return x.id !== t.id; });
+        save();
+        renderTasks();
+        renderAchievement();
+      });
+
+      li.appendChild(cb);
+      li.appendChild(span);
+      li.appendChild(chip);
+      li.appendChild(del);
+      taskListEl.appendChild(li);
+    });
+  }
+
+  document.getElementById("taskAddBtn").addEventListener("click", addTaskFromInput);
+  document.getElementById("taskInput").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") addTaskFromInput();
+  });
+  function addTaskFromInput() {
+    var input = document.getElementById("taskInput");
+    var v = input.value.trim();
+    if (!v) return;
+    state.tasks.push({ id: uid(), text: v, priority: null, done: false, thisWeek: true });
+    input.value = "";
+    save();
+    renderTasks();
+    renderAchievement();
+  }
+
+  // 簡易ヒューリスティックによる優先度判定(将来的にAIモデル呼び出しに置き換え可能)
+  var HIGH_WORDS = ["締切", "今日", "急", "重要", "必須", "期限", "至急"];
+  var LOW_WORDS = ["いつか", "余裕", "後で", "気が向いたら", "そのうち"];
+  function guessPriority(text) {
+    if (HIGH_WORDS.some(function (w) { return text.indexOf(w) !== -1; })) return "high";
+    if (LOW_WORDS.some(function (w) { return text.indexOf(w) !== -1; })) return "low";
+    return "mid";
+  }
+
+  document.getElementById("aiSortBtn").addEventListener("click", function () {
+    var changed = 0;
+    state.tasks.forEach(function (t) {
+      if (!t.done) {
+        t.priority = guessPriority(t.text);
+        changed++;
+      }
+    });
+    save();
+    renderTasks();
+    toast(changed + " 件のタスクに優先度をつけました");
+  });
+
+  // ---------- notes ----------
+  var notesGrid = document.getElementById("notesGrid");
+  var notesEmptyHint = document.getElementById("notesEmptyHint");
+
+  function renderNotes() {
+    notesGrid.innerHTML = "";
+    notesEmptyHint.hidden = state.notes.length > 0;
+
+    state.notes.forEach(function (n) {
+      var card = document.createElement("div");
+      card.className = "note-card";
+
+      var text = document.createElement("div");
+      text.className = "note-text";
+      text.textContent = n.text;
+
+      var foot = document.createElement("div");
+      foot.className = "note-foot";
+
+      var date = document.createElement("span");
+      date.className = "note-date";
+      date.textContent = fmtDate(n.addedAt);
+
+      var actions = document.createElement("div");
+      actions.className = "note-actions";
+
+      var promote = document.createElement("button");
+      promote.className = "btn-tiny";
+      promote.type = "button";
+      promote.textContent = "タスクにする →";
+      promote.addEventListener("click", function () {
+        state.notes = state.notes.filter(function (x) { return x.id !== n.id; });
+        state.tasks.push({ id: uid(), text: n.text, priority: null, done: false, thisWeek: true });
+        save();
+        renderNotes();
+        renderTasks();
+        renderAchievement();
+        toast("タスクに追加しました");
+      });
+
+      var del = document.createElement("button");
+      del.className = "btn-tiny danger";
+      del.type = "button";
+      del.textContent = "削除";
+      del.addEventListener("click", function () {
+        state.notes = state.notes.filter(function (x) { return x.id !== n.id; });
+        save();
+        renderNotes();
+      });
+
+      actions.appendChild(promote);
+      actions.appendChild(del);
+      foot.appendChild(date);
+      foot.appendChild(actions);
+      card.appendChild(text);
+      card.appendChild(foot);
+      notesGrid.appendChild(card);
+    });
+  }
+
+  document.getElementById("noteAddBtn").addEventListener("click", addNoteFromInput);
+  document.getElementById("noteInput").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") addNoteFromInput();
+  });
+  function addNoteFromInput() {
+    var input = document.getElementById("noteInput");
+    var v = input.value.trim();
+    if (!v) return;
+    state.notes.push({ id: uid(), text: v, addedAt: new Date().toISOString() });
+    input.value = "";
+    save();
+    renderNotes();
+  }
+
+  // ---------- init ----------
+  renderVision();
+  renderAchievement();
+  renderTime();
+  renderTasks();
+  renderNotes();
+})();
+</script>
