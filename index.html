@@ -746,6 +746,13 @@
   .btn-tiny:hover { text-decoration: underline; }
   .btn-tiny.danger { color: var(--text-muted); }
   .btn-tiny.danger:hover { color: var(--status-high); }
+  .btn-tiny.danger.is-armed {
+    color: var(--status-high);
+    background: var(--status-high-bg);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 800;
+  }
 
   .toast {
     position: fixed;
@@ -1388,6 +1395,7 @@
     modalPurposeInput.value = p.purpose || "";
     renderModalProgress();
     renderModalTaskList();
+    resetDeleteArm();
     modalBackdrop.hidden = false;
     document.body.style.overflow = "hidden";
   }
@@ -1395,6 +1403,7 @@
     modalBackdrop.hidden = true;
     document.body.style.overflow = "";
     currentModalProjectId = null;
+    resetDeleteArm();
     renderProjects();
   }
   function renderModalProgress() {
@@ -1448,11 +1457,35 @@
     refreshAfterTaskChange();
   }
 
-  document.getElementById("modalDeleteBtn").addEventListener("click", function () {
-    var p = projectById(currentModalProjectId);
-    if (!p) return;
-    if (!confirm("「" + p.name + "」を削除しますか？\nひもづくタスクは削除されず、「今月のタスク」にそのまま残ります。")) return;
+  // window.confirm() はサンドボックス化された環境(Artifactのプレビューなど)では
+  // ダイアログ自体が表示されずに false を即返すことがあり、削除ボタンが反応しない
+  // 原因になる。ブラウザの確認ダイアログには頼らず、ボタン自体を2段階にする。
+  var modalDeleteBtn = document.getElementById("modalDeleteBtn");
+  var modalDeleteDefaultLabel = modalDeleteBtn.textContent;
+  var deleteArmed = false;
+  var deleteArmTimer = null;
+
+  function resetDeleteArm() {
+    deleteArmed = false;
+    clearTimeout(deleteArmTimer);
+    modalDeleteBtn.textContent = modalDeleteDefaultLabel;
+    modalDeleteBtn.classList.remove("is-armed");
+  }
+
+  modalDeleteBtn.addEventListener("click", function () {
+    if (!currentModalProjectId) return;
+
+    if (!deleteArmed) {
+      deleteArmed = true;
+      modalDeleteBtn.textContent = "本当に削除する？(もう一度クリック)";
+      modalDeleteBtn.classList.add("is-armed");
+      clearTimeout(deleteArmTimer);
+      deleteArmTimer = setTimeout(resetDeleteArm, 4000);
+      return;
+    }
+
     var deletedId = currentModalProjectId;
+    resetDeleteArm();
     state.projects = state.projects.filter(function (x) { return x.id !== deletedId; });
     state.tasks.forEach(function (t) { if (t.projectId === deletedId) t.projectId = null; });
     save();
