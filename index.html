@@ -918,8 +918,10 @@
   var PRIORITY_LABEL = { high: "優先度: 高", mid: "優先度: 中", low: "優先度: 低" };
 
   function renderTasks() {
+    // 完了状態では並び替えない — チェックのたびに行の位置が動くと
+    // 「別のタスクにチェックが入った」ように見えてしまうため、
+    // 並び順は優先度(AIで優先度をつける、を押した時点のもの)だけで決める。
     var sorted = state.tasks.slice().sort(function (a, b) {
-      if (a.done !== b.done) return a.done ? 1 : -1;
       var ra = PRIORITY_RANK[a.priority] !== undefined ? PRIORITY_RANK[a.priority] : 3;
       var rb = PRIORITY_RANK[b.priority] !== undefined ? PRIORITY_RANK[b.priority] : 3;
       return ra - rb;
