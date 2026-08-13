@@ -511,6 +511,36 @@
   .chip.low::before  { background: var(--status-low); }
   .chip.none { background: var(--surface-card-2); color: var(--text-muted); border: 1px dashed var(--border-strong); }
   .chip.none::before { display: none; }
+  .chip-select-wrap {
+    position: relative;
+    padding-right: 18px;
+    cursor: pointer;
+  }
+  .chip-select-wrap:hover { filter: brightness(0.96); }
+  .chip-select-wrap::after {
+    content: "▾";
+    position: absolute;
+    right: 7px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 8px;
+    opacity: 0.7;
+    pointer-events: none;
+  }
+  .chip-select {
+    -webkit-appearance: none;
+    appearance: none;
+    background: none;
+    border: none;
+    margin: 0;
+    padding: 0;
+    color: inherit;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .chip-select:focus-visible { outline-offset: 2px; }
   .task-edit {
     flex: none;
     background: none;
@@ -1283,14 +1313,31 @@
       }
     }
 
+    // 優先度チップは表示だけでなく、そのままクリックして手動で変更できる
+    // <select> にしている。「未分類」もプルダウンの選択肢のひとつとして扱う。
     var chip = document.createElement("span");
-    if (t.priority && PRIORITY_LABEL[t.priority]) {
-      chip.className = "chip " + t.priority;
-      chip.textContent = PRIORITY_LABEL[t.priority];
-    } else {
-      chip.className = "chip none";
-      chip.textContent = "未分類";
-    }
+    chip.className = "chip chip-select-wrap " + (t.priority && PRIORITY_LABEL[t.priority] ? t.priority : "none");
+
+    var prioritySelect = document.createElement("select");
+    prioritySelect.className = "chip-select";
+    prioritySelect.setAttribute("aria-label", "優先度を選択");
+    [
+      ["", "未分類"],
+      ["high", PRIORITY_LABEL.high],
+      ["mid", PRIORITY_LABEL.mid],
+      ["low", PRIORITY_LABEL.low]
+    ].forEach(function (pair) {
+      var o = document.createElement("option");
+      o.value = pair[0];
+      o.textContent = pair[1];
+      if ((t.priority || "") === pair[0]) o.selected = true;
+      prioritySelect.appendChild(o);
+    });
+    prioritySelect.addEventListener("change", function () {
+      t.priority = prioritySelect.value || null;
+      refreshAfterTaskChange();
+    });
+    chip.appendChild(prioritySelect);
 
     var del = document.createElement("button");
     del.className = "task-del";
