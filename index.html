@@ -771,10 +771,24 @@
     overflow-wrap: anywhere;
     white-space: pre-wrap;
   }
+  .note-edit-input {
+    flex: 1;
+    width: 100%;
+    min-height: 64px;
+    padding: 7px 9px;
+    border: 1px solid var(--ink);
+    border-radius: 3px;
+    background: var(--surface-card);
+    font-size: 13.5px;
+    line-height: 1.6;
+    resize: vertical;
+  }
   .note-foot {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
+    row-gap: 6px;
     gap: 8px;
   }
   .note-date {
@@ -782,7 +796,7 @@
     color: var(--text-muted);
     font-variant-numeric: tabular-nums;
   }
-  .note-actions { display: flex; gap: 6px; }
+  .note-actions { display: flex; gap: 6px; flex-wrap: wrap; }
   .btn-tiny {
     background: none;
     border: none;
@@ -790,6 +804,7 @@
     font-weight: 700;
     color: var(--ink);
     padding: 2px 4px;
+    white-space: nowrap;
   }
   .btn-tiny:hover { text-decoration: underline; }
   .btn-tiny.danger { color: var(--text-muted); }
@@ -1632,6 +1647,12 @@
       var actions = document.createElement("div");
       actions.className = "note-actions";
 
+      var editBtn = document.createElement("button");
+      editBtn.className = "btn-tiny";
+      editBtn.type = "button";
+      editBtn.textContent = "編集";
+      editBtn.addEventListener("click", function () { startEditingNote(); });
+
       var promote = document.createElement("button");
       promote.className = "btn-tiny";
       promote.type = "button";
@@ -1656,6 +1677,7 @@
         renderNotes();
       });
 
+      actions.appendChild(editBtn);
       actions.appendChild(promote);
       actions.appendChild(del);
       foot.appendChild(date);
@@ -1663,6 +1685,64 @@
       card.appendChild(text);
       card.appendChild(foot);
       notesGrid.appendChild(card);
+
+      // メモの編集。textarea + 保存/キャンセルに差し替える(複数行になり得るため、
+      // タスクのインライン編集と違い Enter では保存しない)。
+      function startEditingNote() {
+        var textarea = document.createElement("textarea");
+        textarea.className = "note-edit-input";
+        textarea.value = n.text;
+        card.replaceChild(textarea, text);
+
+        var saveBtn = document.createElement("button");
+        saveBtn.className = "btn-tiny";
+        saveBtn.type = "button";
+        saveBtn.textContent = "保存";
+
+        var cancelBtn = document.createElement("button");
+        cancelBtn.className = "btn-tiny danger";
+        cancelBtn.type = "button";
+        cancelBtn.textContent = "キャンセル";
+
+        var editActions = document.createElement("div");
+        editActions.className = "note-actions";
+        editActions.appendChild(saveBtn);
+        editActions.appendChild(cancelBtn);
+        foot.replaceChild(editActions, actions);
+
+        textarea.focus();
+        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+
+        var settled = false;
+        function restoreView() {
+          if (card.contains(textarea)) card.replaceChild(text, textarea);
+          if (foot.contains(editActions)) foot.replaceChild(actions, editActions);
+        }
+        function commit() {
+          if (settled) return;
+          settled = true;
+          var v = textarea.value.trim();
+          if (v && v !== n.text) {
+            n.text = v;
+            save();
+            renderNotes();
+          } else {
+            restoreView();
+          }
+        }
+        function cancel() {
+          if (settled) return;
+          settled = true;
+          restoreView();
+        }
+
+        saveBtn.addEventListener("click", commit);
+        cancelBtn.addEventListener("click", cancel);
+        textarea.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") { e.preventDefault(); cancel(); }
+          else if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); commit(); }
+        });
+      }
     });
   }
 
