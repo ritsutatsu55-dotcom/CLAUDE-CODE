@@ -511,6 +511,24 @@
   .chip.low::before  { background: var(--status-low); }
   .chip.none { background: var(--surface-card-2); color: var(--text-muted); border: 1px dashed var(--border-strong); }
   .chip.none::before { display: none; }
+  .task-edit {
+    flex: none;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    line-height: 1;
+    padding: 4px 6px;
+  }
+  .task-edit:hover { color: var(--ink); }
+  .task-edit-input {
+    width: 100%;
+    font-size: 14px;
+    padding: 4px 7px;
+    border: 1px solid var(--ink);
+    border-radius: 3px;
+    background: var(--surface-card-2);
+  }
   .task-del {
     flex: none;
     background: none;
@@ -1205,6 +1223,51 @@
     span.textContent = t.text;
     main.appendChild(span);
 
+    // タスク文言のインライン編集。span を input に一時的に差し替えるだけで
+    // リスト全体は再描画しない(編集中にフォーカスが飛ぶのを防ぐため)。
+    // 実際に文言が変わったときだけ refreshAfterTaskChange() でまとめて反映する。
+    function startEditingText() {
+      var input = document.createElement("input");
+      input.type = "text";
+      input.className = "task-edit-input";
+      input.value = t.text;
+      input.setAttribute("aria-label", "タスクを編集");
+      main.replaceChild(input, span);
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
+
+      var settled = false;
+      function commit() {
+        if (settled) return;
+        settled = true;
+        var v = input.value.trim();
+        if (v && v !== t.text) {
+          t.text = v;
+          refreshAfterTaskChange();
+        } else if (main.contains(input)) {
+          main.replaceChild(span, input);
+        }
+      }
+      function cancel() {
+        if (settled) return;
+        settled = true;
+        if (main.contains(input)) main.replaceChild(span, input);
+      }
+
+      input.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") { e.preventDefault(); commit(); }
+        else if (e.key === "Escape") { e.preventDefault(); cancel(); }
+      });
+      input.addEventListener("blur", commit);
+    }
+
+    var editBtn = document.createElement("button");
+    editBtn.className = "task-edit";
+    editBtn.type = "button";
+    editBtn.setAttribute("aria-label", "タスクを編集");
+    editBtn.textContent = "✎";
+    editBtn.addEventListener("click", startEditingText);
+
     if (!opts.hideProjectTag && t.projectId) {
       var proj = projectById(t.projectId);
       if (proj) {
@@ -1242,6 +1305,7 @@
     li.appendChild(cb);
     li.appendChild(main);
     li.appendChild(chip);
+    li.appendChild(editBtn);
     li.appendChild(del);
     return li;
   }
