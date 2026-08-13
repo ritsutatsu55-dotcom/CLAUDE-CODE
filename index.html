@@ -461,8 +461,14 @@
     accent-color: var(--ink);
     flex: none;
   }
-  .task-text {
+  .task-main {
     flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .task-text {
     font-size: 14px;
     min-width: 0;
     overflow-wrap: anywhere;
@@ -471,6 +477,16 @@
     color: var(--text-muted);
     text-decoration: line-through;
   }
+  .task-project-tag {
+    align-self: flex-start;
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .task-project-tag:hover { text-decoration: underline; }
   .chip {
     flex: none;
     display: inline-flex;
@@ -495,6 +511,54 @@
   .chip.low::before  { background: var(--status-low); }
   .chip.none { background: var(--surface-card-2); color: var(--text-muted); border: 1px dashed var(--border-strong); }
   .chip.none::before { display: none; }
+  .chip-select-wrap {
+    position: relative;
+    padding-right: 18px;
+    cursor: pointer;
+  }
+  .chip-select-wrap:hover { filter: brightness(0.96); }
+  .chip-select-wrap::after {
+    content: "▾";
+    position: absolute;
+    right: 7px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 8px;
+    opacity: 0.7;
+    pointer-events: none;
+  }
+  .chip-select {
+    -webkit-appearance: none;
+    appearance: none;
+    background: none;
+    border: none;
+    margin: 0;
+    padding: 0;
+    color: inherit;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .chip-select:focus-visible { outline-offset: 2px; }
+  .task-edit {
+    flex: none;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    line-height: 1;
+    padding: 4px 6px;
+  }
+  .task-edit:hover { color: var(--ink); }
+  .task-edit-input {
+    width: 100%;
+    font-size: 14px;
+    padding: 4px 7px;
+    border: 1px solid var(--ink);
+    border-radius: 3px;
+    background: var(--surface-card-2);
+  }
   .task-del {
     flex: none;
     background: none;
@@ -528,6 +592,160 @@
     padding: 14px 2px 2px;
   }
 
+  /* ---------- projects ---------- */
+  .project-list {
+    display: flex;
+    flex-direction: column;
+    margin-top: 14px;
+  }
+  .project-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    background: none;
+    border: none;
+    border-top: 1px solid var(--border);
+    padding: 14px 4px;
+    text-align: left;
+    color: inherit;
+  }
+  .project-item:first-child { border-top: none; }
+  .project-item:hover .project-name { color: var(--ink); }
+  .project-item-main { flex: 1; min-width: 0; }
+  .project-item-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .project-name {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .project-count {
+    flex: none;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .project-purpose {
+    margin: 4px 0 10px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .meter {
+    height: 6px;
+    border-radius: 4px;
+    background: var(--series-progress-track);
+    overflow: hidden;
+  }
+  .meter-fill {
+    height: 100%;
+    background: var(--series-progress);
+    border-radius: 4px;
+  }
+  .project-chevron {
+    flex: none;
+    font-size: 20px;
+    color: var(--text-muted);
+  }
+
+  /* ---------- project detail modal(小ページ) ---------- */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,10,14,0.5);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 6vh 16px;
+    overflow-y: auto;
+    z-index: 60;
+  }
+  .modal {
+    background: var(--surface-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    box-shadow: var(--shadow-card);
+    width: 100%;
+    max-width: 480px;
+    padding: 22px 22px 20px;
+  }
+  .modal-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .modal-name-input {
+    flex: 1;
+    min-width: 0;
+    background: none;
+    border: none;
+    border-bottom: 1px solid transparent;
+    font-size: 20px;
+    font-weight: 700;
+    padding: 2px 0 6px;
+  }
+  .modal-name-input:focus { border-bottom-color: var(--ink); }
+  .modal-close {
+    flex: none;
+    background: none;
+    border: none;
+    font-size: 20px;
+    line-height: 1;
+    color: var(--text-muted);
+    padding: 4px;
+  }
+  .modal-close:hover { color: var(--status-high); }
+  .modal-field { margin-bottom: 20px; }
+  .modal-field label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+  .modal-field textarea {
+    width: 100%;
+    min-height: 72px;
+    padding: 9px 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: 3px;
+    background: var(--surface-card-2);
+    font-size: 13.5px;
+    line-height: 1.6;
+    resize: vertical;
+  }
+  .modal-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .modal-progress .meter { flex: 1; }
+  .modal-progress-label {
+    flex: none;
+    font-size: 12.5px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .modal-hint {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    margin: 6px 0 0;
+  }
+  .modal-field .add-row { margin-top: 12px; padding-top: 0; border-top: none; }
+  .modal-foot {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+
   /* ---------- notes board ---------- */
   .notes-grid {
     display: grid;
@@ -553,10 +771,24 @@
     overflow-wrap: anywhere;
     white-space: pre-wrap;
   }
+  .note-edit-input {
+    flex: 1;
+    width: 100%;
+    min-height: 64px;
+    padding: 7px 9px;
+    border: 1px solid var(--ink);
+    border-radius: 3px;
+    background: var(--surface-card);
+    font-size: 13.5px;
+    line-height: 1.6;
+    resize: vertical;
+  }
   .note-foot {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
+    row-gap: 6px;
     gap: 8px;
   }
   .note-date {
@@ -564,7 +796,7 @@
     color: var(--text-muted);
     font-variant-numeric: tabular-nums;
   }
-  .note-actions { display: flex; gap: 6px; }
+  .note-actions { display: flex; gap: 6px; flex-wrap: wrap; }
   .btn-tiny {
     background: none;
     border: none;
@@ -572,10 +804,18 @@
     font-weight: 700;
     color: var(--ink);
     padding: 2px 4px;
+    white-space: nowrap;
   }
   .btn-tiny:hover { text-decoration: underline; }
   .btn-tiny.danger { color: var(--text-muted); }
   .btn-tiny.danger:hover { color: var(--status-high); }
+  .btn-tiny.danger.is-armed {
+    color: var(--status-high);
+    background: var(--status-high-bg);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 800;
+  }
 
   .toast {
     position: fixed;
@@ -713,7 +953,25 @@
     </div>
   </section>
 
-  <!-- 4. 検討中・メモ -->
+  <!-- 4. 進行中プロジェクト -->
+  <section class="card" aria-label="進行中プロジェクト">
+    <div class="card-head">
+      <div>
+        <p class="card-title">進行中プロジェクト</p>
+        <p class="card-sub">クリックすると、目的・進捗・タスクの詳細が開きます</p>
+      </div>
+    </div>
+
+    <div class="project-list" id="projectList"></div>
+    <p class="empty-hint" id="projectEmptyHint" hidden>プロジェクトはまだありません。下から追加してください。</p>
+
+    <div class="add-row">
+      <input type="text" id="projectInput" placeholder="プロジェクト名を追加（例：新規サービスの企画）" />
+      <button class="btn-primary" id="projectAddBtn" type="button">追加</button>
+    </div>
+  </section>
+
+  <!-- 5. 検討中・メモ -->
   <section class="card" aria-label="検討中・アイデアメモ">
     <div class="card-head">
       <div>
@@ -735,6 +993,44 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+<div class="modal-backdrop" id="projectModalBackdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-label="プロジェクトの詳細">
+    <div class="modal-head">
+      <input class="modal-name-input font-display" id="modalNameInput" aria-label="プロジェクト名" />
+      <button class="modal-close" id="modalCloseBtn" type="button" aria-label="閉じる">×</button>
+    </div>
+
+    <div class="modal-field">
+      <label for="modalPurposeInput">プロジェクトの目的</label>
+      <textarea id="modalPurposeInput" placeholder="このプロジェクトで実現したいこと"></textarea>
+    </div>
+
+    <div class="modal-field">
+      <label>プロジェクトの進捗度</label>
+      <div class="modal-progress">
+        <div class="meter"><div class="meter-fill" id="modalMeterFill" style="width:0%"></div></div>
+        <span class="modal-progress-label" id="modalProgressLabel">0%（0 / 0 件）</span>
+      </div>
+      <p class="modal-hint">タスクリストの完了状況から自動的に算出されます</p>
+    </div>
+
+    <div class="modal-field">
+      <label>プロジェクトのタスクリスト</label>
+      <p class="modal-hint">ここで追加・完了したタスクは「今月のタスク」にもそのまま反映されます。</p>
+      <ul class="task-list" id="modalTaskList"></ul>
+      <p class="empty-hint" id="modalTaskEmptyHint" hidden>タスクはまだありません。</p>
+      <div class="add-row">
+        <input type="text" id="modalTaskInput" placeholder="タスクを追加" />
+        <button class="btn-primary" id="modalTaskAddBtn" type="button">追加</button>
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <button class="btn-tiny danger" id="modalDeleteBtn" type="button">このプロジェクトを削除</button>
+    </div>
+  </div>
+</div>
 
 <script>
 (function () {
@@ -761,6 +1057,8 @@
 
   function defaultState() {
     var now = new Date();
+    var projA = uid();
+    var projB = uid();
     return {
       vision: {
         month: monthKey(now),
@@ -771,10 +1069,16 @@
         return { label: label, hours: i < todayIdx ? [1.5, 2, 0, 3, 1][i % 5] || 0 : 0 };
       }),
       tasks: [
-        { id: uid(), text: "今月の目標を3つに絞って書き出す", priority: "high", done: true, thisWeek: true },
-        { id: uid(), text: "先延ばしにしていた企画書を仕上げる", priority: "high", done: false, thisWeek: true },
-        { id: uid(), text: "毎朝15分の運動を習慣化する", priority: "mid", done: false, thisWeek: true },
-        { id: uid(), text: "本棚の整理をする", priority: "low", done: false, thisWeek: false }
+        { id: uid(), text: "今月の目標を3つに絞って書き出す", priority: "high", done: true, thisWeek: true, projectId: null },
+        { id: uid(), text: "先延ばしにしていた企画書を仕上げる", priority: "high", done: false, thisWeek: true, projectId: projA },
+        { id: uid(), text: "毎朝15分の運動を習慣化する", priority: "mid", done: false, thisWeek: true, projectId: null },
+        { id: uid(), text: "本棚の整理をする", priority: "low", done: false, thisWeek: false, projectId: null },
+        { id: uid(), text: "競合サービスを3つ調べる", priority: null, done: true, thisWeek: true, projectId: projA },
+        { id: uid(), text: "ヒアリング項目をまとめる", priority: null, done: false, thisWeek: false, projectId: projB }
+      ],
+      projects: [
+        { id: projA, name: "新規サービスの企画", purpose: "既存事業の枠を超えた収益の柱を、年内に立ち上げられる状態にする。", createdAt: now.toISOString() },
+        { id: projB, name: "顧客ヒアリングの仕組み化", purpose: "毎月の顧客の声を、感覚ではなく定量的に拾えるようにする。", createdAt: now.toISOString() }
       ],
       notes: [
         { id: uid(), text: "副業のアイデア、Claudeとブレスト中。来月方向性を決める。", addedAt: now.toISOString() },
@@ -791,6 +1095,13 @@
       var now = new Date();
       if (!parsed.vision || parsed.vision.month !== monthKey(now)) {
         // 月が変わったら、達成度は今月分としてリセットしつつ vision は編集を促す
+      }
+      // 既存データ(プロジェクト機能追加前)との互換用の穴埋め
+      if (!parsed.projects) parsed.projects = [];
+      if (parsed.tasks) {
+        parsed.tasks.forEach(function (t) {
+          if (t.projectId === undefined) t.projectId = null;
+        });
       }
       return parsed;
     } catch (e) {
@@ -917,9 +1228,155 @@
   var PRIORITY_RANK = { high: 0, mid: 1, low: 2, null: 3 };
   var PRIORITY_LABEL = { high: "優先度: 高", mid: "優先度: 中", low: "優先度: 低" };
 
+  function projectById(id) {
+    return state.projects.find(function (p) { return p.id === id; });
+  }
+
+  // タスクの完了/削除は「今月のタスク」とプロジェクト小ページの両方から
+  // 起こりうるので、状態の保存とすべての表示への反映をここに集約する。
+  function refreshAfterTaskChange() {
+    save();
+    renderTasks();
+    renderAchievement();
+    renderProjects();
+    renderModalTaskList();
+    renderModalProgress();
+  }
+
+  // タスク1行分のDOMを作る共通処理。「今月のタスク」とプロジェクト小ページの
+  // タスクリストの両方から呼ばれ、同じ task オブジェクトを直接書き換えるので
+  // どちらでチェックしても状態は自動的に一致する。
+  function buildTaskRow(t, opts) {
+    opts = opts || {};
+    var li = document.createElement("li");
+    li.className = "task-item" + (t.done ? " done" : "");
+
+    var cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.checked = t.done;
+    cb.setAttribute("aria-label", t.text);
+    cb.addEventListener("change", function () {
+      t.done = cb.checked;
+      refreshAfterTaskChange();
+    });
+
+    var main = document.createElement("div");
+    main.className = "task-main";
+
+    var span = document.createElement("span");
+    span.className = "task-text";
+    span.textContent = t.text;
+    main.appendChild(span);
+
+    // タスク文言のインライン編集。span を input に一時的に差し替えるだけで
+    // リスト全体は再描画しない(編集中にフォーカスが飛ぶのを防ぐため)。
+    // 実際に文言が変わったときだけ refreshAfterTaskChange() でまとめて反映する。
+    function startEditingText() {
+      var input = document.createElement("input");
+      input.type = "text";
+      input.className = "task-edit-input";
+      input.value = t.text;
+      input.setAttribute("aria-label", "タスクを編集");
+      main.replaceChild(input, span);
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
+
+      var settled = false;
+      function commit() {
+        if (settled) return;
+        settled = true;
+        var v = input.value.trim();
+        if (v && v !== t.text) {
+          t.text = v;
+          refreshAfterTaskChange();
+        } else if (main.contains(input)) {
+          main.replaceChild(span, input);
+        }
+      }
+      function cancel() {
+        if (settled) return;
+        settled = true;
+        if (main.contains(input)) main.replaceChild(span, input);
+      }
+
+      input.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") { e.preventDefault(); commit(); }
+        else if (e.key === "Escape") { e.preventDefault(); cancel(); }
+      });
+      input.addEventListener("blur", commit);
+    }
+
+    var editBtn = document.createElement("button");
+    editBtn.className = "task-edit";
+    editBtn.type = "button";
+    editBtn.setAttribute("aria-label", "タスクを編集");
+    editBtn.textContent = "✎";
+    editBtn.addEventListener("click", startEditingText);
+
+    if (!opts.hideProjectTag && t.projectId) {
+      var proj = projectById(t.projectId);
+      if (proj) {
+        var tag = document.createElement("button");
+        tag.type = "button";
+        tag.className = "task-project-tag";
+        tag.textContent = "📁 " + proj.name;
+        tag.addEventListener("click", function (e) {
+          e.stopPropagation();
+          openProjectModal(proj.id);
+        });
+        main.appendChild(tag);
+      }
+    }
+
+    // 優先度チップは表示だけでなく、そのままクリックして手動で変更できる
+    // <select> にしている。「未分類」もプルダウンの選択肢のひとつとして扱う。
+    var chip = document.createElement("span");
+    chip.className = "chip chip-select-wrap " + (t.priority && PRIORITY_LABEL[t.priority] ? t.priority : "none");
+
+    var prioritySelect = document.createElement("select");
+    prioritySelect.className = "chip-select";
+    prioritySelect.setAttribute("aria-label", "優先度を選択");
+    [
+      ["", "未分類"],
+      ["high", PRIORITY_LABEL.high],
+      ["mid", PRIORITY_LABEL.mid],
+      ["low", PRIORITY_LABEL.low]
+    ].forEach(function (pair) {
+      var o = document.createElement("option");
+      o.value = pair[0];
+      o.textContent = pair[1];
+      if ((t.priority || "") === pair[0]) o.selected = true;
+      prioritySelect.appendChild(o);
+    });
+    prioritySelect.addEventListener("change", function () {
+      t.priority = prioritySelect.value || null;
+      refreshAfterTaskChange();
+    });
+    chip.appendChild(prioritySelect);
+
+    var del = document.createElement("button");
+    del.className = "task-del";
+    del.type = "button";
+    del.setAttribute("aria-label", "削除");
+    del.textContent = "×";
+    del.addEventListener("click", function () {
+      state.tasks = state.tasks.filter(function (x) { return x.id !== t.id; });
+      refreshAfterTaskChange();
+    });
+
+    li.appendChild(cb);
+    li.appendChild(main);
+    li.appendChild(chip);
+    li.appendChild(editBtn);
+    li.appendChild(del);
+    return li;
+  }
+
   function renderTasks() {
+    // 完了状態では並び替えない — チェックのたびに行の位置が動くと
+    // 「別のタスクにチェックが入った」ように見えてしまうため、
+    // 並び順は優先度(AIで優先度をつける、を押した時点のもの)だけで決める。
     var sorted = state.tasks.slice().sort(function (a, b) {
-      if (a.done !== b.done) return a.done ? 1 : -1;
       var ra = PRIORITY_RANK[a.priority] !== undefined ? PRIORITY_RANK[a.priority] : 3;
       var rb = PRIORITY_RANK[b.priority] !== undefined ? PRIORITY_RANK[b.priority] : 3;
       return ra - rb;
@@ -927,52 +1384,8 @@
 
     taskListEl.innerHTML = "";
     taskEmptyHint.hidden = sorted.length > 0;
-
     sorted.forEach(function (t) {
-      var li = document.createElement("li");
-      li.className = "task-item" + (t.done ? " done" : "");
-
-      var cb = document.createElement("input");
-      cb.type = "checkbox";
-      cb.checked = t.done;
-      cb.setAttribute("aria-label", t.text);
-      cb.addEventListener("change", function () {
-        t.done = cb.checked;
-        save();
-        renderTasks();
-        renderAchievement();
-      });
-
-      var span = document.createElement("span");
-      span.className = "task-text";
-      span.textContent = t.text;
-
-      var chip = document.createElement("span");
-      if (t.priority && PRIORITY_LABEL[t.priority]) {
-        chip.className = "chip " + t.priority;
-        chip.textContent = PRIORITY_LABEL[t.priority];
-      } else {
-        chip.className = "chip none";
-        chip.textContent = "未分類";
-      }
-
-      var del = document.createElement("button");
-      del.className = "task-del";
-      del.type = "button";
-      del.setAttribute("aria-label", "削除");
-      del.textContent = "×";
-      del.addEventListener("click", function () {
-        state.tasks = state.tasks.filter(function (x) { return x.id !== t.id; });
-        save();
-        renderTasks();
-        renderAchievement();
-      });
-
-      li.appendChild(cb);
-      li.appendChild(span);
-      li.appendChild(chip);
-      li.appendChild(del);
-      taskListEl.appendChild(li);
+      taskListEl.appendChild(buildTaskRow(t));
     });
   }
 
@@ -984,11 +1397,9 @@
     var input = document.getElementById("taskInput");
     var v = input.value.trim();
     if (!v) return;
-    state.tasks.push({ id: uid(), text: v, priority: null, done: false, thisWeek: true });
+    state.tasks.push({ id: uid(), text: v, priority: null, done: false, thisWeek: true, projectId: null });
     input.value = "";
-    save();
-    renderTasks();
-    renderAchievement();
+    refreshAfterTaskChange();
   }
 
   // 簡易ヒューリスティックによる優先度判定(将来的にAIモデル呼び出しに置き換え可能)
@@ -1010,7 +1421,204 @@
     });
     save();
     renderTasks();
+    renderModalTaskList();
     toast(changed + " 件のタスクに優先度をつけました");
+  });
+
+  // ---------- projects ----------
+  var projectListEl = document.getElementById("projectList");
+  var projectEmptyHint = document.getElementById("projectEmptyHint");
+
+  function computeProjectStats(projectId) {
+    var list = state.tasks.filter(function (t) { return t.projectId === projectId; });
+    var done = list.filter(function (t) { return t.done; }).length;
+    return { total: list.length, done: done, ratio: list.length ? done / list.length : 0 };
+  }
+
+  function renderProjects() {
+    projectListEl.innerHTML = "";
+    projectEmptyHint.hidden = state.projects.length > 0;
+
+    state.projects.forEach(function (p) {
+      var stats = computeProjectStats(p.id);
+
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "project-item";
+      btn.addEventListener("click", function () { openProjectModal(p.id); });
+
+      var main = document.createElement("div");
+      main.className = "project-item-main";
+
+      var top = document.createElement("div");
+      top.className = "project-item-top";
+      var name = document.createElement("span");
+      name.className = "project-name font-display";
+      name.textContent = p.name;
+      var count = document.createElement("span");
+      count.className = "project-count";
+      count.textContent = stats.done + " / " + stats.total + " 件";
+      top.appendChild(name);
+      top.appendChild(count);
+
+      var purpose = document.createElement("p");
+      purpose.className = "project-purpose";
+      purpose.textContent = p.purpose || "目的はまだ書かれていません";
+
+      var meter = document.createElement("div");
+      meter.className = "meter";
+      var fill = document.createElement("div");
+      fill.className = "meter-fill";
+      fill.style.width = Math.round(stats.ratio * 100) + "%";
+      meter.appendChild(fill);
+
+      main.appendChild(top);
+      main.appendChild(purpose);
+      main.appendChild(meter);
+
+      var chevron = document.createElement("span");
+      chevron.className = "project-chevron";
+      chevron.setAttribute("aria-hidden", "true");
+      chevron.textContent = "›";
+
+      btn.appendChild(main);
+      btn.appendChild(chevron);
+      projectListEl.appendChild(btn);
+    });
+  }
+
+  document.getElementById("projectAddBtn").addEventListener("click", addProjectFromInput);
+  document.getElementById("projectInput").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") addProjectFromInput();
+  });
+  function addProjectFromInput() {
+    var input = document.getElementById("projectInput");
+    var v = input.value.trim();
+    if (!v) return;
+    var p = { id: uid(), name: v, purpose: "", createdAt: new Date().toISOString() };
+    state.projects.push(p);
+    input.value = "";
+    save();
+    renderProjects();
+    openProjectModal(p.id);
+  }
+
+  // ---------- project detail modal(小ページ) ----------
+  var modalBackdrop = document.getElementById("projectModalBackdrop");
+  var modalNameInput = document.getElementById("modalNameInput");
+  var modalPurposeInput = document.getElementById("modalPurposeInput");
+  var modalMeterFill = document.getElementById("modalMeterFill");
+  var modalProgressLabel = document.getElementById("modalProgressLabel");
+  var modalTaskListEl = document.getElementById("modalTaskList");
+  var modalTaskEmptyHint = document.getElementById("modalTaskEmptyHint");
+  var currentModalProjectId = null;
+
+  function openProjectModal(projectId) {
+    var p = projectById(projectId);
+    if (!p) return;
+    currentModalProjectId = projectId;
+    modalNameInput.value = p.name;
+    modalPurposeInput.value = p.purpose || "";
+    renderModalProgress();
+    renderModalTaskList();
+    resetDeleteArm();
+    modalBackdrop.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+  function closeProjectModal() {
+    modalBackdrop.hidden = true;
+    document.body.style.overflow = "";
+    currentModalProjectId = null;
+    resetDeleteArm();
+    renderProjects();
+  }
+  function renderModalProgress() {
+    if (!currentModalProjectId) return;
+    var stats = computeProjectStats(currentModalProjectId);
+    var pct = Math.round(stats.ratio * 100);
+    modalMeterFill.style.width = pct + "%";
+    modalProgressLabel.textContent = pct + "%（" + stats.done + " / " + stats.total + " 件）";
+  }
+  function renderModalTaskList() {
+    if (!currentModalProjectId) return;
+    var list = state.tasks.filter(function (t) { return t.projectId === currentModalProjectId; });
+    modalTaskListEl.innerHTML = "";
+    modalTaskEmptyHint.hidden = list.length > 0;
+    list.forEach(function (t) {
+      modalTaskListEl.appendChild(buildTaskRow(t, { hideProjectTag: true }));
+    });
+  }
+
+  document.getElementById("modalCloseBtn").addEventListener("click", closeProjectModal);
+  modalBackdrop.addEventListener("click", function (e) {
+    if (e.target === modalBackdrop) closeProjectModal();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !modalBackdrop.hidden) closeProjectModal();
+  });
+
+  modalNameInput.addEventListener("input", function () {
+    var p = projectById(currentModalProjectId);
+    if (!p) return;
+    p.name = modalNameInput.value;
+    save();
+  });
+  modalPurposeInput.addEventListener("input", function () {
+    var p = projectById(currentModalProjectId);
+    if (!p) return;
+    p.purpose = modalPurposeInput.value;
+    save();
+  });
+
+  document.getElementById("modalTaskAddBtn").addEventListener("click", addModalTask);
+  document.getElementById("modalTaskInput").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") addModalTask();
+  });
+  function addModalTask() {
+    var input = document.getElementById("modalTaskInput");
+    var v = input.value.trim();
+    if (!v || !currentModalProjectId) return;
+    state.tasks.push({ id: uid(), text: v, priority: null, done: false, thisWeek: true, projectId: currentModalProjectId });
+    input.value = "";
+    refreshAfterTaskChange();
+  }
+
+  // window.confirm() はサンドボックス化された環境(Artifactのプレビューなど)では
+  // ダイアログ自体が表示されずに false を即返すことがあり、削除ボタンが反応しない
+  // 原因になる。ブラウザの確認ダイアログには頼らず、ボタン自体を2段階にする。
+  var modalDeleteBtn = document.getElementById("modalDeleteBtn");
+  var modalDeleteDefaultLabel = modalDeleteBtn.textContent;
+  var deleteArmed = false;
+  var deleteArmTimer = null;
+
+  function resetDeleteArm() {
+    deleteArmed = false;
+    clearTimeout(deleteArmTimer);
+    modalDeleteBtn.textContent = modalDeleteDefaultLabel;
+    modalDeleteBtn.classList.remove("is-armed");
+  }
+
+  modalDeleteBtn.addEventListener("click", function () {
+    if (!currentModalProjectId) return;
+
+    if (!deleteArmed) {
+      deleteArmed = true;
+      modalDeleteBtn.textContent = "本当に削除する？(もう一度クリック)";
+      modalDeleteBtn.classList.add("is-armed");
+      clearTimeout(deleteArmTimer);
+      deleteArmTimer = setTimeout(resetDeleteArm, 4000);
+      return;
+    }
+
+    var deletedId = currentModalProjectId;
+    resetDeleteArm();
+    state.projects = state.projects.filter(function (x) { return x.id !== deletedId; });
+    state.tasks.forEach(function (t) { if (t.projectId === deletedId) t.projectId = null; });
+    save();
+    closeProjectModal();
+    renderTasks();
+    renderAchievement();
+    toast("プロジェクトを削除しました");
   });
 
   // ---------- notes ----------
@@ -1039,13 +1647,19 @@
       var actions = document.createElement("div");
       actions.className = "note-actions";
 
+      var editBtn = document.createElement("button");
+      editBtn.className = "btn-tiny";
+      editBtn.type = "button";
+      editBtn.textContent = "編集";
+      editBtn.addEventListener("click", function () { startEditingNote(); });
+
       var promote = document.createElement("button");
       promote.className = "btn-tiny";
       promote.type = "button";
       promote.textContent = "タスクにする →";
       promote.addEventListener("click", function () {
         state.notes = state.notes.filter(function (x) { return x.id !== n.id; });
-        state.tasks.push({ id: uid(), text: n.text, priority: null, done: false, thisWeek: true });
+        state.tasks.push({ id: uid(), text: n.text, priority: null, done: false, thisWeek: true, projectId: null });
         save();
         renderNotes();
         renderTasks();
@@ -1063,6 +1677,7 @@
         renderNotes();
       });
 
+      actions.appendChild(editBtn);
       actions.appendChild(promote);
       actions.appendChild(del);
       foot.appendChild(date);
@@ -1070,6 +1685,64 @@
       card.appendChild(text);
       card.appendChild(foot);
       notesGrid.appendChild(card);
+
+      // メモの編集。textarea + 保存/キャンセルに差し替える(複数行になり得るため、
+      // タスクのインライン編集と違い Enter では保存しない)。
+      function startEditingNote() {
+        var textarea = document.createElement("textarea");
+        textarea.className = "note-edit-input";
+        textarea.value = n.text;
+        card.replaceChild(textarea, text);
+
+        var saveBtn = document.createElement("button");
+        saveBtn.className = "btn-tiny";
+        saveBtn.type = "button";
+        saveBtn.textContent = "保存";
+
+        var cancelBtn = document.createElement("button");
+        cancelBtn.className = "btn-tiny danger";
+        cancelBtn.type = "button";
+        cancelBtn.textContent = "キャンセル";
+
+        var editActions = document.createElement("div");
+        editActions.className = "note-actions";
+        editActions.appendChild(saveBtn);
+        editActions.appendChild(cancelBtn);
+        foot.replaceChild(editActions, actions);
+
+        textarea.focus();
+        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+
+        var settled = false;
+        function restoreView() {
+          if (card.contains(textarea)) card.replaceChild(text, textarea);
+          if (foot.contains(editActions)) foot.replaceChild(actions, editActions);
+        }
+        function commit() {
+          if (settled) return;
+          settled = true;
+          var v = textarea.value.trim();
+          if (v && v !== n.text) {
+            n.text = v;
+            save();
+            renderNotes();
+          } else {
+            restoreView();
+          }
+        }
+        function cancel() {
+          if (settled) return;
+          settled = true;
+          restoreView();
+        }
+
+        saveBtn.addEventListener("click", commit);
+        cancelBtn.addEventListener("click", cancel);
+        textarea.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") { e.preventDefault(); cancel(); }
+          else if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); commit(); }
+        });
+      }
     });
   }
 
@@ -1092,6 +1765,7 @@
   renderAchievement();
   renderTime();
   renderTasks();
+  renderProjects();
   renderNotes();
 })();
 </script>
